@@ -1,5 +1,8 @@
+require 'weigh/report'
+
 module Weigh
   class Runner
+
     attr_reader :flags
 
     def initialize(flags)
@@ -7,7 +10,9 @@ module Weigh
     end
 
     def run
-      puts "no"
+      summary = {}
+      Weigh::Report.print(summary)
+
       return 127
     end
 

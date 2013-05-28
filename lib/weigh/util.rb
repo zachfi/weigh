@@ -18,5 +18,35 @@ module Weigh
       neat
     end
 
+    def self.sum_dir(dir,verbose=false)
+      # return the size of a given directory
+      #"Entering: #{dir}"
+      count=0
+      dir_size=0
+      data={}
+      Find.find(dir) do |path|
+        count += 1
+        next if FileTest.symlink?(path)
+        next if dir == path
+        if FileTest.directory?(path)
+          ret = sum_dir(path,verbose)
+          size = ret[:dir_size]
+          count += ret[:count]
+          dir_size += size
+          Find.prune
+        else
+          size = FileTest.size(path)
+          #puts "File: #{path} is #{size}"
+          puts "Found zero size file: #{path}" if verbose
+          dir_size += size
+        end
+      end
+      #puts "Exiting: #{dir} with #{dir_size}"
+      data[:dir_size] = dir_size
+      data[:count] = count
+      data
+    end
+
+
   end
 end
