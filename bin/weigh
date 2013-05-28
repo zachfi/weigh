@@ -1,0 +1,6 @@
+#! /usr/bin/env ruby
+# Weigh directory contents
+
+require 'weigh/cli'
+
+exit Weigh::CLI.run ARGV
