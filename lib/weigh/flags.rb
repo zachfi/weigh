@@ -6,11 +6,13 @@ module Weigh
     attr_reader :args
     attr_reader :verbose
     attr_reader :depth
+    attr_reader :pathlist
 
     def initialize(*args)
-      @args    = []
-      @verbose = false
-      @depth   = 1
+      @args     = []
+      @verbose  = false
+      @depth    = 1
+      @pathlist = []
 
       @options = OptionParser.new do|o|
         o.banner = "Usage: #{File.basename $0} [options] [file|directory...]\n\n"
@@ -29,6 +31,14 @@ module Weigh
       end
 
       @args = @options.parse!
+
+      if ARGV.size > 0
+        ARGV.each do |f|
+          @pathlist << f
+        end
+      else
+        @pathlist << "."
+      end
 
       def help?
         @help

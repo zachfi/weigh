@@ -3,4 +3,4 @@
 
 require 'weigh/cli'
 
-exit Weigh::CLI.run ARGV
+Weigh::CLI.run ARGV
