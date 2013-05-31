@@ -1,6 +1,6 @@
 # Weigh
 
-A small ruby utility to wieigh directory contents.  Heavy stuff to the bottom.
+A small ruby utility to weigh directory contents.  Heavy stuff to the bottom.
 
 ## Example output
 
