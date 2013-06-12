@@ -21,10 +21,24 @@ module Weigh
       runner.run
     end
 
+    def self.shutdown
+      puts "Terminating..."
+      exit 0
+    end
+
+    Signal.trap("TERM") do
+      shutdown()
+    end
+
+    Signal.trap("INT") do
+      shutdown()
+    end
+
     def self.run(*args)
       flags = Weigh::Flags.new args
 
       return Weigh::CLI.new(flags).run
     end
+
   end
 end
