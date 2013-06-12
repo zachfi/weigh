@@ -4,7 +4,9 @@ module Weigh
     def self.neat_size(bytes)
       # return a human readble size from the bytes supplied
       bytes = bytes.to_f
-      if bytes > 2 ** 40       # TiB: 1024 GiB
+      if bytes > 2 ** 50       # PiB: 1024 TiB
+        neat = sprintf("%.2f PiB", bytes / 2**50)
+      elsif bytes > 2 ** 40    # TiB: 1024 GiB
         neat = sprintf("%.2f TiB", bytes / 2**40)
       elsif bytes > 2 ** 30    # GiB: 1024 MiB
         neat = sprintf("%.2f GiB", bytes / 2**30)
