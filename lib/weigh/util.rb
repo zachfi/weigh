@@ -49,15 +49,15 @@ module Weigh
       data
     end
 
-    def self.report(summary,total_size)
-      summary.sort{|a,b| a[1]<=>b[1]}.each { |elem|
+    def self.report(data)
+      data[:summary].sort{|a,b| a[1]<=>b[1]}.each { |elem|
         size     = elem[1]
         filename = elem[0]
         puts sprintf("%15s   %s\n", neat_size(size), filename)
       }
 
       puts sprintf("%16s %s\n", "---", "---")
-      puts sprintf("%15s   %s\n", self.neat_size(total_size), ":total size")
+      puts sprintf("%15s   %s\n", self.neat_size(data[:total_size]), ":total size")
       puts sprintf("%16s %s\n", "---", "---")
     end
 

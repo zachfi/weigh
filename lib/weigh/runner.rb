@@ -12,6 +12,7 @@ module Weigh
     end
 
     def run
+      data = {}
       total_size = 0
       summary = {}
       count = 0
@@ -39,9 +40,10 @@ module Weigh
           end
         end
       end
+      data[:summary]    = summary
+      data[:total_size] = total_size
 
-      Weigh::Util.report(summary,total_size)
+      data
     end
-
   end
 end

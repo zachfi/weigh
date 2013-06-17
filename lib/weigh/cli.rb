@@ -1,5 +1,6 @@
 require 'weigh/flags'
 require 'weigh/runner'
+require 'weigh/util'
 
 module Weigh
   class CLI
@@ -36,8 +37,8 @@ module Weigh
 
     def self.run(*args)
       flags = Weigh::Flags.new args
-
-      return Weigh::CLI.new(flags).run
+      data = Weigh::CLI.new(flags).run
+      Weigh::Util.report(data)
     end
 
   end
