@@ -28,13 +28,18 @@ module Weigh
           next if FileTest.symlink?(path)
 
           if FileTest.directory?(path)
+
+            # Skip the path that we are already on
             next if p == path
+
+            # Summarize the directory data
             ret = Weigh::Util.sum_dir(path,@flags.verbose)
             dir_size = ret[:dir_size]
 
             # Skip empty directories
             next if dir_size == 0
 
+            # Record the data from the directory
             data[:count]      += ret[:count]
             data[:total_size] += dir_size
 
