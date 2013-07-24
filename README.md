@@ -1,5 +1,7 @@
 # Weigh
 
+[![Build Status](https://travis-ci.org/xaque208/weigh.png?branch=master)](https://travis-ci.org/xaque208/weigh)
+
 A small ruby utility to weigh directory contents.  Heavy stuff to the bottom.
 
 ## Example output
