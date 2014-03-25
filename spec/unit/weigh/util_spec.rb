@@ -1,6 +1,8 @@
 require 'weigh/cli'
+require 'weigh/util'
+require 'weigh/version'
 
-describe 'Weigh::Runner' do
+describe 'Weigh::Util' do
   it "should return a neat size if bytes" do
     Weigh::Util.neat_size(1000).should eq("1000 bytes")
   end
@@ -23,5 +25,11 @@ describe 'Weigh::Runner' do
 
   it "should return a neat size if Petabytes" do
     Weigh::Util.neat_size(129210285642927238).should eq("114.76 PiB")
+  end
+end
+
+describe 'Weigh::CLI' do
+  it "should return the version" do
+    lambda { Weigh::CLI.command.run(['-V']) }.should raise_error SystemExit
   end
 end

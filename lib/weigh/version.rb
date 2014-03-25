@@ -1,7 +1,3 @@
 module Weigh
-  VERSION = '0.0.3'
-
-  def self.version
-    VERSION
-  end
+  VERSION = '0.1.0'
 end

@@ -1,6 +1,11 @@
 module Weigh
   module Util
 
+    # Convert a byte count into something a bit more human friendly
+    #
+    # @param [Int] a byte count
+    #
+    # @return [String] human readable byte count 
     def self.neat_size(bytes)
       # return a human readble size from the bytes supplied
       bytes = bytes.to_f
@@ -20,35 +25,57 @@ module Weigh
       neat
     end
 
+    # Sumarize the size of the given directory
+    #
+    # @param [String] full path to directory
+    # @param [Boolean] increase verbosity
+    #
+    # @return Hash {:dir_size => Hash, :count => Int}
     def self.sum_dir(dir,verbose=false)
       # return the size of a given directory
       #"Entering: #{dir}"
-      count=0
-      dir_size=0
-      data={}
+      count    = 0
+      dir_size = 0
+      data     = {}
+
       Find.find(dir) do |path|
-        count += 1
-        next if FileTest.symlink?(path)
-        next if dir == path
-        if FileTest.directory?(path)
-          ret = sum_dir(path,verbose)
-          size = ret[:dir_size]
-          count += ret[:count]
-          dir_size += size
-          Find.prune
-        else
-          size = FileTest.size(path)
-          #puts "File: #{path} is #{size}"
-          puts "Found zero size file: #{path}" if verbose
-          dir_size += size
+        begin
+          puts path if verbose
+          count += 1
+          if FileTest.symlink?(path)
+            puts "skipping symlink " + path if verbose
+            next
+          end
+          if dir == path and File.directory?(path)
+            puts "skipping current directory " + path if verbose
+            next
+          end
+          if FileTest.directory?(path)
+            ret = sum_dir(path,verbose)
+            size = ret[:dir_size]
+            count += ret[:count]
+            dir_size += size
+            Find.prune
+          else
+            size = FileTest.size(path)
+            #puts "File: #{path} is #{size}"
+            puts "Found zero size file: #{path}" if verbose
+            dir_size += size
+          end
+        rescue IOError
+          puts "file vanished: " + path
         end
       end
-      #puts "Exiting: #{dir} with #{dir_size}"
       data[:dir_size] = dir_size
       data[:count] = count
       data
     end
 
+    # Print a summary of the received data
+    #
+    # @param [Hash]
+    #
+    # @returns [Hash] the unmodified data
     def self.report(data)
       data[:summary].sort{|a,b| a[1]<=>b[1]}.each { |elem|
         size     = elem[1]
@@ -59,34 +86,7 @@ module Weigh
       puts sprintf("%16s %s\n", "---", "---")
       puts sprintf("%15s   %s\n", self.neat_size(data[:total_size]), ":total size")
       puts sprintf("%16s %s\n", "---", "---")
-    end
 
-    def sum_dir(dir,verbose=false)
-      # return the size of a given directory
-      #"Entering: #{dir}"
-      count=0
-      dir_size=0
-      data={}
-      Find.find(dir) do |path|
-        count += 1
-        next if FileTest.symlink?(path)
-        next if dir == path
-        if FileTest.directory?(path)
-          ret = sum_dir(path,verbose)
-          size = ret[:dir_size]
-          count += ret[:count]
-          dir_size += size
-          Find.prune
-        else
-          size = FileTest.size(path)
-          #puts "File: #{path} is #{size}"
-          puts "Found zero size file: #{path}" if verbose
-          dir_size += size
-        end
-      end
-      #puts "Exiting: #{dir} with #{dir_size}"
-      data[:dir_size] = dir_size
-      data[:count] = count
       data
     end
   end

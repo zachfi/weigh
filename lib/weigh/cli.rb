@@ -1,45 +1,44 @@
-require 'weigh/flags'
-require 'weigh/runner'
+require 'weigh/run'
 require 'weigh/util'
+require 'cri'
 
-module Weigh
-  class CLI
+module Weigh::CLI
 
-    attr_reader :flags
-    attr_reader :runner
+  def self.command
+    @cmd ||= Cri::Command.define do
+      name 'weigh'
+      usage 'weigh [options] <path1> <path2>'
+      summary 'Summarize the size of directories and files'
 
-    def initialize(flags)
-      @flags  = flags
-      @runner = Weigh::Runner.new(@flags)
-    end
+      w = Weigh::Run.new
 
-    def run
-      if flags.help?
-        puts flags
-        exit
+      flag :h, :help, 'show help for this command' do |value, cmd|
+        puts cmd.help
+        exit 0
       end
 
-      runner.run
-    end
+      flag :V, :version, 'show help for this command' do |value, cmd|
+        require 'weigh/version'
+        puts "Weigh.rb version " + Weigh::VERSION
+        exit 0
+      end
 
-    def self.shutdown
-      puts "Terminating..."
-      exit 0
-    end
+      flag :v, :verbose, 'speak up' do |value, cmd|
+        w.verbose = true
+      end
 
-    Signal.trap("TERM") do
-      shutdown()
-    end
+      flag :d, :depth, 'Sumarize deeper than depth' do |value, cmd|
+        #w.depth = value
+      end
 
-    Signal.trap("INT") do
-      shutdown()
+      run do |opts, args, cmd|
+        if args.size > 0
+          w.pathlist = args
+        end
+        w.run
+        w.report
+        exit 0
+      end
     end
-
-    def self.run(*args)
-      flags = Weigh::Flags.new args
-      data = Weigh::CLI.new(flags).run
-      Weigh::Util.report(data)
-    end
-
   end
 end
