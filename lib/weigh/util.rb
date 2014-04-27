@@ -33,14 +33,14 @@ module Weigh
     # @return Hash {:dir_size => Hash, :count => Int}
     def self.sum_dir(dir,verbose=false)
       # return the size of a given directory
-      #"Entering: #{dir}"
+      puts "summarizing directory #{dir}" if verbose
       count    = 0
       dir_size = 0
       data     = {}
 
       Find.find(dir) do |path|
         begin
-          puts path if verbose
+          puts "==>  including " + path if verbose
           count += 1
           if FileTest.symlink?(path)
             puts "skipping symlink " + path if verbose
@@ -59,11 +59,15 @@ module Weigh
           else
             size = FileTest.size(path)
             #puts "File: #{path} is #{size}"
-            puts "Found zero size file: #{path}" if verbose
-            dir_size += size
+            if size == 0
+              puts "skipping zero size file: #{path}" if verbose and size == 0
+              next
+            else
+              dir_size += size
+            end
           end
         rescue IOError
-          puts "file vanished: " + path
+          puts "File vanished: " + path
         end
       end
       data[:dir_size] = dir_size
