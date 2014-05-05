@@ -33,24 +33,22 @@ module Weigh
     # @return Hash {:dir_size => Hash, :count => Int}
     def self.sum_dir(dir,verbose=false)
       # return the size of a given directory
-      puts "summarizing directory #{dir}" if verbose
+      puts "==>  summarizing directory #{dir}" if verbose
       count    = 0
       dir_size = 0
       data     = {}
 
       Find.find(dir) do |path|
         begin
-          puts "==>  including " + path if verbose
+          puts '==>  analyzing ' + path if verbose
           count += 1
           if FileTest.symlink?(path)
-            puts "skipping symlink " + path if verbose
+            puts "==>  skipping symlink " + path if verbose
             next
-          end
-          if dir == path and File.directory?(path)
-            puts "skipping current directory " + path if verbose
+          elsif dir == path and File.directory?(path)
+            puts "==>  skipping directory being summarized " + path if verbose
             next
-          end
-          if FileTest.directory?(path)
+          elsif FileTest.directory?(path)
             ret = sum_dir(path,verbose)
             size = ret[:dir_size]
             count += ret[:count]
