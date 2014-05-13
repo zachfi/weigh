@@ -14,9 +14,14 @@ Gem::Specification.new do |gem|
   gem.homepage = 'https://github.com/xaque208/weigh'
 
   # ensure the gem is built out of versioned files
-   gem.files = Dir['Rakefile', '{bin,lib}/**/*', 'README*', 'LICENSE*'] & %x(git ls-files -z).split("\0")
+  gem.files = Dir['Rakefile', '{bin,lib}/**/*', 'README*', 'LICENSE*'] & %x(git ls-files -z).split("\0")
 
-   gem.executables << 'weigh'
+  gem.executables << 'weigh'
+
+  gem.add_development_dependency 'rspec'
+
+  gem.add_runtime_dependency 'cri'
+  gem.add_runtime_dependency 'colored'
 
 end
 
