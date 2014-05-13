@@ -1,28 +1,42 @@
 require 'weigh/util'
-require 'pp'
 require 'find'
 
 module Weigh
-  class Runner
+  class Run
 
-    attr_reader :flags
+    attr_accessor :verbose, :pathlist
 
-    def initialize(flags)
-      @flags = flags
+    def initialize(pathlist=['.'])
+      @pathlist = pathlist
+
+      @data              = {
+        :total_size => 0,
+        :summary    => {},
+        :count      => 0
+      }
+    end
+
+    def verbose=(value)
+      @verbose = value
+    end
+
+    def verbose
+      @verbose
+    end
+
+    def pathlist=(value)
+      @pathlist = value
+    end
+
+    def pathlist
+      @pathlist
     end
 
     def run
-
-      # Initialize the data blob
-      data              = {}
-      data[:total_size] = 0
-      data[:summary]    = {}
-      data[:count]      = 0
-
       # Dig into each path given
-      @flags.pathlist.each do |p|
+      @pathlist.each do |p|
         Find.find(p) do |path|
-          data[:count] += 1
+          @data[:count] += 1
 
           # Skip symlinks
           next if FileTest.symlink?(path)
@@ -33,20 +47,20 @@ module Weigh
             next if p == path
 
             # Summarize the directory data
-            ret = Weigh::Util.sum_dir(path,@flags.verbose)
+            ret = Weigh::Util.sum_dir(path,@verbose)
             dir_size = ret[:dir_size]
 
             # Skip empty directories
             next if dir_size == 0
 
             # Record the data from the directory
-            data[:count]      += ret[:count]
-            data[:total_size] += dir_size
+            @data[:count]      += ret[:count]
+            @data[:total_size] += dir_size
 
             # Add a trailing slash to the key for directories
             pathname = path + "/"
 
-            data[:summary][pathname] = dir_size
+            @data[:summary][pathname] = dir_size
 
             Find.prune
           else
@@ -56,13 +70,17 @@ module Weigh
             # Don't count zero sized files
             next if size == 0
 
-            data[:total_size] += size
-            data[:summary][path] = size
+            @data[:total_size] += size
+            @data[:summary][path] = size
           end
         end
       end
 
-      data
+      @data
+    end
+
+    def report
+      Weigh::Util.report @data
     end
   end
 end

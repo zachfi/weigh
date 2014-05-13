@@ -1,6 +1,13 @@
 #! /usr/bin/env ruby
-# Weigh directory contents
+
+# Summarize the size of directories and rank the totals.
 
 require 'weigh/cli'
+require 'colored'
 
-Weigh::CLI.run ARGV
+begin
+  Weigh::CLI.command.run ARGV
+rescue Interrupt
+  $stderr.puts "Terminating!".red
+  exit 1
+end

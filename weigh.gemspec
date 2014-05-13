@@ -3,7 +3,7 @@ require File.expand_path("../lib/weigh/version", __FILE__)
 Gem::Specification.new do |gem|
 
   gem.name    = 'weigh'
-  gem.version = Weigh.version
+  gem.version = Weigh::VERSION
   gem.date    = Date.today.to_s
 
   gem.summary     = "Weigh directory contents"
