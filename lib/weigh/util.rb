@@ -58,12 +58,13 @@ module Weigh
             Find.prune
           else
             size = FileTest.size(path)
-            #puts "File: #{path} is #{size}"
             puts "Found zero size file: #{path}" if verbose
             dir_size += size
           end
-        rescue IOError
-          puts "file vanished: " + path
+        rescue IOError => e
+          puts "File vanished #{path}:#{e.message}"
+        rescue Errno::ENOENT => e
+          puts "Could not open file #{path}:#{e.message}"
         end
       end
       data[:dir_size] = dir_size
