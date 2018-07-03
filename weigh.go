@@ -1,11 +1,15 @@
 package main
 
-import "path/filepath"
-import "flag"
-import "fmt"
-import "os"
-import "io/ioutil"
-import "sort"
+import (
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"sort"
+)
+
+import log "github.com/sirupsen/logrus"
 
 const (
 	BYTE     = 1.0
@@ -61,6 +65,7 @@ func neatSize(bytes int64) string {
 }
 
 func dirBytes(directory string) int64 {
+	log.Infof("Entering directory %s", directory)
 	var dirSize int64 = 0
 
 	countDir := func(path string, info os.FileInfo, err error) error {
@@ -91,12 +96,24 @@ func report(summaries summariesData) {
 		}
 
 		total += item.Bytes
-		fmt.Printf("%15s    %s\n", neatSize(item.Bytes), item.Name)
+
+		fi, err := os.Stat(item.Name)
+
+		switch {
+		case err != nil:
+			log.Error(err)
+		case fi.IsDir():
+			fmt.Printf("%15s    %s/\n", neatSize(item.Bytes), item.Name)
+		default:
+			fmt.Printf("%15s    %s\n", neatSize(item.Bytes), item.Name)
+		}
+
 	}
 
 	fmt.Printf("%16s %s\n", "---", "---")
 	fmt.Printf("%15s  %s\n", neatSize(total), ":total size")
 	fmt.Printf("%16s %s\n", "---", "---")
+
 }
 
 func topDir(directory string) summariesData {
@@ -118,7 +135,17 @@ func topDir(directory string) summariesData {
 }
 
 func main() {
+
+	var verbose bool
+	flag.BoolVar(&verbose, "v", false, "Increase verbosity")
+
 	flag.Parse()
+
+	if verbose {
+		log.SetLevel(log.InfoLevel)
+	} else {
+		log.SetLevel(log.WarnLevel)
+	}
 
 	directories := flag.Args()
 
