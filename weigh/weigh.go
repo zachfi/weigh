@@ -1,15 +1,14 @@
-package main
+package weigh
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
-)
 
-import log "github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
+)
 
 const (
 	BYTE     = 1.0
@@ -19,6 +18,62 @@ const (
 	TERABYTE = 1024 * GIGABYTE
 	PETABYTE = 1024 * TERABYTE
 )
+
+type Weigh struct {
+	Paths     []string
+	Summaries summariesData
+}
+
+func (w *Weigh) Summarize() {
+	if len(w.Paths) == 0 {
+		log.Debugf("Adding default path")
+		w.Paths = []string{"./"}
+	}
+
+	summaries := summariesData{}
+
+	for _, d := range w.Paths {
+		for _, sum := range topDir(d) {
+			summaries = append(summaries, sum)
+		}
+	}
+
+	w.Summaries = summaries
+}
+
+func (w *Weigh) Report() {
+	summaries := w.Summaries
+	var total int64 = 0
+
+	sort.Sort(summaries)
+
+	for _, item := range summaries {
+		if item.Bytes == 0 {
+			continue
+		}
+
+		total += item.Bytes
+
+		fi, err := os.Stat(item.Name)
+
+		switch {
+		case err != nil:
+			log.Error(err)
+		case fi.IsDir():
+			fmt.Printf("%15s    %s/\n", neatSize(item.Bytes), item.Name)
+		default:
+			fmt.Printf("%15s    %s\n", neatSize(item.Bytes), item.Name)
+		}
+
+	}
+
+	fmt.Printf("%16s %s\n", "---", "---")
+	fmt.Printf("%15s  %s\n", neatSize(total), ":total size")
+	fmt.Printf("%16s %s\n", "---", "---")
+}
+
+func (w *Weigh) Export() {
+}
 
 type summaryData struct {
 	Name  string
@@ -65,7 +120,7 @@ func neatSize(bytes int64) string {
 }
 
 func dirBytes(directory string) int64 {
-	log.Infof("Entering directory %s", directory)
+	log.Debugf("Entering directory %s", directory)
 	var dirSize int64 = 0
 
 	countDir := func(path string, info os.FileInfo, err error) error {
@@ -85,41 +140,13 @@ func dirBytes(directory string) int64 {
 	return dirSize
 }
 
-func report(summaries summariesData) {
-	var total int64 = 0
-
-	sort.Sort(summaries)
-
-	for _, item := range summaries {
-		if item.Bytes == 0 {
-			continue
-		}
-
-		total += item.Bytes
-
-		fi, err := os.Stat(item.Name)
-
-		switch {
-		case err != nil:
-			log.Error(err)
-		case fi.IsDir():
-			fmt.Printf("%15s    %s/\n", neatSize(item.Bytes), item.Name)
-		default:
-			fmt.Printf("%15s    %s\n", neatSize(item.Bytes), item.Name)
-		}
-
-	}
-
-	fmt.Printf("%16s %s\n", "---", "---")
-	fmt.Printf("%15s  %s\n", neatSize(total), ":total size")
-	fmt.Printf("%16s %s\n", "---", "---")
-
-}
-
 func topDir(directory string) summariesData {
 	summary := summariesData{}
 
-	files, _ := ioutil.ReadDir(directory)
+	files, err := ioutil.ReadDir(directory)
+	if err != nil {
+		log.Error(err)
+	}
 
 	for _, f := range files {
 		fullpath := filepath.Join(directory, f.Name())
@@ -132,35 +159,4 @@ func topDir(directory string) summariesData {
 	}
 
 	return summary
-}
-
-func main() {
-
-	var verbose bool
-	flag.BoolVar(&verbose, "v", false, "Increase verbosity")
-
-	flag.Parse()
-
-	if verbose {
-		log.SetLevel(log.InfoLevel)
-	} else {
-		log.SetLevel(log.WarnLevel)
-	}
-
-	directories := flag.Args()
-
-	if len(directories) == 0 {
-		directories = append(directories, "./")
-	}
-
-	// summaries := make([]summaryData, 0)
-	summaries := summariesData{}
-
-	for _, d := range directories {
-		for _, sum := range topDir(d) {
-			summaries = append(summaries, sum)
-		}
-	}
-
-	report(summaries)
 }
