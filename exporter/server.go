@@ -32,7 +32,6 @@ var (
 func init() {
 	prometheus.MustRegister(
 		weighDuration,
-		weighTargetGuage,
 	)
 }
 
@@ -45,6 +44,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	start := time.Now()
 	registry := prometheus.NewRegistry()
+	registry.MustRegister(weighTargetGuage)
 
 	x := weigh.Weigh{Paths: []string{target}}
 	x.Summarize()
