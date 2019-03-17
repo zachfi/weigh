@@ -69,6 +69,7 @@ compile: deps compile-only
 coverage:
 	@echo "=== $(PROJECT_NAME) === [ coverage         ]: generating coverage results..."
 	@rm -rf $(COVERAGE_DIR)/*
+	@mkdir $(COVERAGE_DIR)
 	@for d in $(GO_PKGS); do \
 		pkg=`basename $$d` ;\
 		$(GO) test -tags 'unit integration' -coverprofile $(COVERAGE_DIR)/$$pkg.tmp $$d ;\
