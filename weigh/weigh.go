@@ -33,9 +33,7 @@ func (w *Weigh) Summarize() {
 	summaries := summariesData{}
 
 	for _, d := range w.Paths {
-		for _, sum := range topDir(d) {
-			summaries = append(summaries, sum)
-		}
+		summaries = append(summaries, topDir(d)...)
 	}
 
 	w.Summaries = summaries
@@ -135,7 +133,10 @@ func dirBytes(directory string) int64 {
 		return nil
 	}
 
-	filepath.Walk(directory, countDir)
+	err := filepath.Walk(directory, countDir)
+	if err != nil {
+		log.Error(err)
+	}
 
 	return dirSize
 }
