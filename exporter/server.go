@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -28,6 +29,8 @@ var (
 		[]string{"path"},
 	)
 )
+
+type HealthStatus struct{}
 
 func init() {
 	prometheus.MustRegister(
@@ -58,11 +61,25 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	weighDuration.WithLabelValues("weigh").Observe(duration)
 }
 
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+
+	health := &HealthStatus{}
+
+	bytes, err := json.MarshalIndent(health, "", "\t")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(bytes)
+}
+
 func StartMetricsServer(bindAddr string) {
 	d := http.NewServeMux()
 
 	d.Handle("/metrics", promhttp.Handler())
 	d.HandleFunc("/weigh", handler)
+	d.HandleFunc("/status/check", statusHandler)
 
 	err := http.ListenAndServe(bindAddr, d)
 	if err != nil {
