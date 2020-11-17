@@ -71,7 +71,8 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write(bytes)
+	_, err = w.Write(bytes)
+	log.Error(err)
 }
 
 func StartMetricsServer(bindAddr string) {
