@@ -122,6 +122,10 @@ func dirBytes(directory string) int64 {
 	var dirSize int64 = 0
 
 	countDir := func(path string, info os.FileInfo, err error) error {
+		if info == nil {
+			return fmt.Errorf("unable to count nil info: %s", path)
+		}
+
 		if !info.IsDir() {
 			dirSize += info.Size()
 		}
