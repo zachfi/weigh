@@ -127,7 +127,7 @@ func dirBytes(directory string) int64 {
 		}
 
 		if err != nil {
-			fmt.Print(err)
+			log.Error(err)
 		}
 
 		return nil
