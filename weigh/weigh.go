@@ -21,7 +21,7 @@ const (
 
 type Weigh struct {
 	Paths     []string
-	Summaries summariesData
+	Summaries SummariesData
 }
 
 func (w *Weigh) Summarize() {
@@ -30,7 +30,7 @@ func (w *Weigh) Summarize() {
 		w.Paths = []string{"./"}
 	}
 
-	summaries := summariesData{}
+	summaries := SummariesData{}
 
 	for _, d := range w.Paths {
 		summaries = append(summaries, topDir(d)...)
@@ -70,25 +70,22 @@ func (w *Weigh) Report() {
 	fmt.Printf("%16s %s\n", "---", "---")
 }
 
-func (w *Weigh) Export() {
-}
-
-type summaryData struct {
+type SummaryData struct {
 	Name  string
 	Bytes int64
 }
 
-type summariesData []summaryData
+type SummariesData []SummaryData
 
-func (slice summariesData) Len() int {
+func (slice SummariesData) Len() int {
 	return len(slice)
 }
 
-func (slice summariesData) Less(i, j int) bool {
+func (slice SummariesData) Less(i, j int) bool {
 	return slice[i].Bytes < slice[j].Bytes
 }
 
-func (slice summariesData) Swap(i, j int) {
+func (slice SummariesData) Swap(i, j int) {
 	slice[i], slice[j] = slice[j], slice[i]
 }
 
@@ -145,8 +142,8 @@ func dirBytes(directory string) int64 {
 	return dirSize
 }
 
-func topDir(directory string) summariesData {
-	summary := summariesData{}
+func topDir(directory string) SummariesData {
+	summary := SummariesData{}
 
 	files, err := ioutil.ReadDir(directory)
 	if err != nil {
@@ -157,9 +154,9 @@ func topDir(directory string) summariesData {
 		fullpath := filepath.Join(directory, f.Name())
 
 		if f.IsDir() {
-			summary = append(summary, summaryData{Name: fullpath, Bytes: dirBytes(fullpath)})
+			summary = append(summary, SummaryData{Name: fullpath, Bytes: dirBytes(fullpath)})
 		} else {
-			summary = append(summary, summaryData{Name: fullpath, Bytes: f.Size()})
+			summary = append(summary, SummaryData{Name: fullpath, Bytes: f.Size()})
 		}
 	}
 
