@@ -12,7 +12,6 @@ import (
 	"github.com/weaveworks/common/server"
 	"github.com/weaveworks/common/signals"
 
-	"github.com/xaque208/weigh/modules/exporter"
 	"github.com/xaque208/znet/pkg/util"
 )
 
@@ -24,8 +23,6 @@ type App struct {
 	Server *server.Server
 
 	logger log.Logger
-
-	exporter *exporter.Exporter
 
 	ModuleManager *modules.Manager
 	serviceMap    map[string]services.Service
