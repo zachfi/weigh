@@ -42,6 +42,7 @@ import (
 	"github.com/xaque208/znet/pkg/util"
 
 	"github.com/xaque208/weigh/app"
+	"github.com/xaque208/weigh/weigh"
 )
 
 const appName = "weigh"
@@ -67,6 +68,13 @@ func main() {
 	if err != nil {
 		_ = level.Error(logger).Log("msg", "failed to load config file", "err", err)
 		os.Exit(1)
+	}
+
+	if cfg.Target == app.Once {
+		w := weigh.Weigh{Paths: cfg.Exporter.Targets}
+		w.Summarize()
+		w.Report()
+		return
 	}
 
 	shutdownTracer, err := installOpenTelemetryTracer(cfg, logger)

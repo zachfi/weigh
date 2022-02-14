@@ -16,20 +16,20 @@ import (
 const (
 	Server string = "server"
 
-	All      string = "all"
+	Once     string = "once"
 	Exporter string = "exporter"
 )
 
 func (a *App) setupModuleManager() error {
 	mm := modules.NewManager(a.logger)
 	mm.RegisterModule(Server, a.initServer, modules.UserInvisibleModule)
-	mm.RegisterModule(All, nil)
+	mm.RegisterModule(Once, nil)
 	mm.RegisterModule(Exporter, a.initExporter)
 
 	deps := map[string][]string{
 		// Server:       nil,
 		Exporter: {Server},
-		All:      {Server, Exporter},
+		Once:     {},
 	}
 
 	for mod, targets := range deps {
@@ -72,6 +72,7 @@ func (a *App) initServer() (services.Service, error) {
 				svs = append(svs, s)
 			}
 		}
+
 		return svs
 	}
 
@@ -92,6 +93,7 @@ func (a *App) initServer() (services.Service, error) {
 			if err != nil {
 				return err
 			}
+
 			return fmt.Errorf("server stopped unexpectedly")
 		}
 	}

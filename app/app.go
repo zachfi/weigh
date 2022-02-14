@@ -37,7 +37,7 @@ func New(cfg Config) (*App, error) {
 	a.logger = util.NewLogger()
 
 	if a.cfg.Target == "" {
-		a.cfg.Target = All
+		a.cfg.Target = Once
 	}
 
 	if err := a.setupModuleManager(); err != nil {

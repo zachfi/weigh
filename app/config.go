@@ -50,7 +50,7 @@ func loadYamlFile(filename string, d interface{}) error {
 }
 
 func (c *Config) RegisterFlagsAndApplyDefaults(prefix string, f *flag.FlagSet) {
-	c.Target = All
-	f.StringVar(&c.Target, "target", All, "target module")
+	c.Target = Once
+	f.StringVar(&c.Target, "target", Once, "target module")
 	f.StringVar(&c.OtelEndpoint, "otel_endpoint", "", "otel endpoint, eg: tempo:4317")
 }
