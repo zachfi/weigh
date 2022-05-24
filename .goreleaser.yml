@@ -50,5 +50,6 @@ dockers:
     build_flag_templates:
       - "--pull"
       - "--label=repository=https://github.com/xaque208/weigh"
+
 release:
   name_template: "{{.ProjectName}} v{{.Version}}"
