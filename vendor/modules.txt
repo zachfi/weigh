@@ -167,7 +167,7 @@ github.com/weaveworks/common/user
 # github.com/weaveworks/promrus v1.2.0
 ## explicit
 github.com/weaveworks/promrus
-# github.com/xaque208/znet v0.31.3
+# github.com/xaque208/znet v0.31.5
 ## explicit; go 1.13
 github.com/xaque208/znet/pkg/util
 # go.opentelemetry.io/otel v1.4.0
