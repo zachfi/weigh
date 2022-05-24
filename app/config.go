@@ -7,8 +7,9 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/weaveworks/common/server"
+	yaml "gopkg.in/yaml.v2"
+
 	"github.com/xaque208/weigh/modules/exporter"
-	"gopkg.in/yaml.v2"
 )
 
 type Config struct {

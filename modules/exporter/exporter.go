@@ -6,8 +6,9 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/xaque208/weigh/weigh"
 	"google.golang.org/grpc"
+
+	"github.com/xaque208/weigh/weigh"
 
 	"github.com/grafana/dskit/services"
 )

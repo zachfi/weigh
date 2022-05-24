@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/weaveworks/common/server"
+
 	"github.com/xaque208/weigh/modules/exporter"
 )
 
