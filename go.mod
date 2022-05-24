@@ -6,7 +6,7 @@ require (
 	github.com/go-kit/log v0.2.0
 	github.com/grafana/dskit v0.0.0-20220523143435-f5a17a2c14c8
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.32.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
