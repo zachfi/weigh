@@ -9,11 +9,9 @@ on:
 jobs:
   gitlint:
     runs-on: ubuntu-latest
+    name: GitLint
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 20
-      - uses: g4s8/gitlint-action@0.2
-        with:
-          since: "2020-03-30"
-          pattern: '(chore|docs|feat|fix|refactor|tests?)(\([^\)]+\))?: .*'
+      - name: Lint commits, branches, and pull requests
+        uses: aschbacd/gitlint-action@v1.1.0
+        re-pull-request-title: '(chore|docs|feat|fix|refactor|tests?)(\([^\)]+\))?: .*'
+        re-commit-message-subject: '(chore|docs|feat|fix|refactor|tests?)(\([^\)]+\))?: .*'
