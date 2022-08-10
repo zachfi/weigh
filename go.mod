@@ -4,13 +4,13 @@ go 1.18
 
 require (
 	github.com/go-kit/log v0.2.1
-	github.com/grafana/dskit v0.0.0-20220524131630-f7f374ef9c0e
+	github.com/grafana/dskit v0.0.0-20220810151300-402124111943
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.32.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
-	github.com/weaveworks/common v0.0.0-20220428113342-f83ccc76d823
+	github.com/weaveworks/common v0.0.0-20220629114710-e3b70df0f08b
 	github.com/xaque208/znet v0.31.5
 	go.opentelemetry.io/otel v1.4.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.4.0
