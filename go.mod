@@ -10,7 +10,7 @@ require (
 	github.com/prometheus/common v0.32.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
-	github.com/weaveworks/common v0.0.0-20220629114710-e3b70df0f08b
+	github.com/weaveworks/common v0.0.0-20220901111029-d2f56921e6b0
 	github.com/xaque208/znet v0.31.5
 	go.opentelemetry.io/otel v1.4.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.4.0
