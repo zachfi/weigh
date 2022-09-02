@@ -50,6 +50,14 @@ type SignalHandler interface {
 	Stop()
 }
 
+// TLSConfig contains TLS parameters for Config.
+type TLSConfig struct {
+	TLSCertPath string `yaml:"cert_file"`
+	TLSKeyPath  string `yaml:"key_file"`
+	ClientAuth  string `yaml:"client_auth_type"`
+	ClientCAs   string `yaml:"client_ca_file"`
+}
+
 // Config for a Server
 type Config struct {
 	MetricsNamespace  string `yaml:"-"`
@@ -62,8 +70,8 @@ type Config struct {
 	GRPCListenPort    int    `yaml:"grpc_listen_port"`
 	GRPCConnLimit     int    `yaml:"grpc_listen_conn_limit"`
 
-	HTTPTLSConfig web.TLSStruct `yaml:"http_tls_config"`
-	GRPCTLSConfig web.TLSStruct `yaml:"grpc_tls_config"`
+	HTTPTLSConfig TLSConfig `yaml:"http_tls_config"`
+	GRPCTLSConfig TLSConfig `yaml:"grpc_tls_config"`
 
 	RegisterInstrumentation  bool `yaml:"register_instrumentation"`
 	ExcludeRequestInLog      bool `yaml:"-"`
@@ -173,19 +181,36 @@ type Server struct {
 
 // New makes a new Server
 func New(cfg Config) (*Server, error) {
+	// If user doesn't supply a logging implementation, by default instantiate
+	// logrus.
+	log := cfg.Log
+	if log == nil {
+		log = logging.NewLogrus(cfg.LogLevel)
+	}
+
+	// If user doesn't supply a registerer/gatherer, use Prometheus' by default.
+	reg := cfg.Registerer
+	if reg == nil {
+		reg = prometheus.DefaultRegisterer
+	}
+	gatherer := cfg.Gatherer
+	if gatherer == nil {
+		gatherer = prometheus.DefaultGatherer
+	}
+
 	tcpConnections := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: cfg.MetricsNamespace,
 		Name:      "tcp_connections",
 		Help:      "Current number of accepted TCP connections.",
 	}, []string{"protocol"})
-	prometheus.MustRegister(tcpConnections)
+	reg.MustRegister(tcpConnections)
 
 	tcpConnectionsLimit := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: cfg.MetricsNamespace,
 		Name:      "tcp_connections_limit",
 		Help:      "The max number of TCP connections that can be accepted (0 means no limit).",
 	}, []string{"protocol"})
-	prometheus.MustRegister(tcpConnectionsLimit)
+	reg.MustRegister(tcpConnectionsLimit)
 
 	network := cfg.HTTPListenNetwork
 	if network == "" {
@@ -218,28 +243,16 @@ func New(cfg Config) (*Server, error) {
 		grpcListener = netutil.LimitListener(grpcListener, cfg.GRPCConnLimit)
 	}
 
-	// If user doesn't supply a logging implementation, by default instantiate
-	// logrus.
-	log := cfg.Log
-	if log == nil {
-		log = logging.NewLogrus(cfg.LogLevel)
-	}
-
-	// If user doesn't supply a registerer/gatherer, use Prometheus' by default.
-	reg := cfg.Registerer
-	if reg == nil {
-		reg = prometheus.DefaultRegisterer
-	}
-	gatherer := cfg.Gatherer
-	if gatherer == nil {
-		gatherer = prometheus.DefaultGatherer
-	}
-
 	// Setup TLS
 	var httpTLSConfig *tls.Config
 	if len(cfg.HTTPTLSConfig.TLSCertPath) > 0 && len(cfg.HTTPTLSConfig.TLSKeyPath) > 0 {
 		// Note: ConfigToTLSConfig from prometheus/exporter-toolkit is awaiting security review.
-		httpTLSConfig, err = web.ConfigToTLSConfig(&cfg.HTTPTLSConfig)
+		httpTLSConfig, err = web.ConfigToTLSConfig(&web.TLSStruct{
+			TLSCertPath: cfg.HTTPTLSConfig.TLSCertPath,
+			TLSKeyPath:  cfg.HTTPTLSConfig.TLSKeyPath,
+			ClientAuth:  cfg.HTTPTLSConfig.ClientAuth,
+			ClientCAs:   cfg.HTTPTLSConfig.ClientCAs,
+		})
 		if err != nil {
 			return nil, fmt.Errorf("error generating http tls config: %v", err)
 		}
@@ -247,7 +260,12 @@ func New(cfg Config) (*Server, error) {
 	var grpcTLSConfig *tls.Config
 	if len(cfg.GRPCTLSConfig.TLSCertPath) > 0 && len(cfg.GRPCTLSConfig.TLSKeyPath) > 0 {
 		// Note: ConfigToTLSConfig from prometheus/exporter-toolkit is awaiting security review.
-		grpcTLSConfig, err = web.ConfigToTLSConfig(&cfg.GRPCTLSConfig)
+		grpcTLSConfig, err = web.ConfigToTLSConfig(&web.TLSStruct{
+			TLSCertPath: cfg.GRPCTLSConfig.TLSCertPath,
+			TLSKeyPath:  cfg.GRPCTLSConfig.TLSKeyPath,
+			ClientAuth:  cfg.GRPCTLSConfig.ClientAuth,
+			ClientCAs:   cfg.GRPCTLSConfig.ClientCAs,
+		})
 		if err != nil {
 			return nil, fmt.Errorf("error generating grpc tls config: %v", err)
 		}
@@ -480,6 +498,17 @@ func (s *Server) Run() error {
 	}()
 
 	return <-errChan
+}
+
+// HTTPListenAddr exposes `net.Addr` that `Server` is listening to for HTTP connections.
+func (s *Server) HTTPListenAddr() net.Addr {
+	return s.httpListener.Addr()
+
+}
+
+// GRPCListenAddr exposes `net.Addr` that `Server` is listening to for GRPC connections.
+func (s *Server) GRPCListenAddr() net.Addr {
+	return s.grpcListener.Addr()
 }
 
 // Stop unblocks Run().
