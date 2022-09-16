@@ -10,7 +10,7 @@ require (
 	github.com/prometheus/common v0.37.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
-	github.com/weaveworks/common v0.0.0-20220901111029-d2f56921e6b0
+	github.com/weaveworks/common v0.0.0-20220916164235-da3fde973eec
 	github.com/xaque208/znet v0.31.5
 	go.opentelemetry.io/otel v1.4.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.4.0
@@ -43,7 +43,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
-	github.com/prometheus/exporter-toolkit v0.7.0 // indirect
+	github.com/prometheus/exporter-toolkit v0.7.2-0.20220901134540-2434b08435da // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/sercand/kuberesolver v2.4.0+incompatible // indirect
 	github.com/uber/jaeger-client-go v2.29.1+incompatible // indirect
