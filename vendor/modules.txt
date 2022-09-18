@@ -109,8 +109,8 @@ github.com/prometheus/common/expfmt
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
 github.com/prometheus/common/model
 github.com/prometheus/common/version
-# github.com/prometheus/exporter-toolkit v0.7.0
-## explicit; go 1.14
+# github.com/prometheus/exporter-toolkit v0.7.2-0.20220901134540-2434b08435da
+## explicit; go 1.17
 github.com/prometheus/exporter-toolkit/web
 # github.com/prometheus/procfs v0.8.0
 ## explicit; go 1.17
@@ -151,7 +151,7 @@ github.com/uber/jaeger-client-go/utils
 ## explicit
 github.com/uber/jaeger-lib/metrics
 github.com/uber/jaeger-lib/metrics/prometheus
-# github.com/weaveworks/common v0.0.0-20220901111029-d2f56921e6b0
+# github.com/weaveworks/common v0.0.0-20220916164235-da3fde973eec
 ## explicit; go 1.14
 github.com/weaveworks/common/errors
 github.com/weaveworks/common/grpc
