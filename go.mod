@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/go-kit/log v0.2.1
-	github.com/grafana/dskit v0.0.0-20220831093637-e414922a81f2
+	github.com/grafana/dskit v0.0.0-20220920070831-95c1e73ed605
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.13.0
 	github.com/prometheus/common v0.37.0

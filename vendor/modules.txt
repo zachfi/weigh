@@ -54,7 +54,7 @@ github.com/golang/protobuf/ptypes/wrappers
 # github.com/gorilla/mux v1.8.0
 ## explicit; go 1.12
 github.com/gorilla/mux
-# github.com/grafana/dskit v0.0.0-20220831093637-e414922a81f2
+# github.com/grafana/dskit v0.0.0-20220920070831-95c1e73ed605
 ## explicit; go 1.18
 github.com/grafana/dskit/flagext
 github.com/grafana/dskit/modules
