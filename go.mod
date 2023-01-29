@@ -1,4 +1,4 @@
-module github.com/xaque208/weigh
+module github.com/zachfi/weigh
 
 go 1.18
 
