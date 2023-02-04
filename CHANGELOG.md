@@ -1,3 +1,16 @@
+<a name="v1.1.8"></a>
+## [v1.1.8] - 2023-02-04
+<a name="v1.1.7"></a>
+## [v1.1.7] - 2023-01-29
+### Bug Fixes
+- **deps:** update github.com/grafana/dskit digest to 95c1e73
+- **deps:** update github.com/weaveworks/common digest to da3fde9
+- **deps:** update module github.com/goreleaser/goreleaser to v1.11.2
+- **deps:** update github.com/grafana/dskit digest to e414922
+- **deps:** update github.com/weaveworks/common digest to d2f5692
+- **deps:** update github.com/grafana/dskit digest to 4021241
+- **deps:** update github.com/grafana/dskit digest to f7f374e
+
 <a name="v1.1.6"></a>
 ## [v1.1.6] - 2022-05-24
 <a name="v1.1.5"></a>
@@ -46,7 +59,9 @@
 ## [v1.0.0] - 2019-03-14
 <a name="0.1.2"></a>
 ## 0.1.2 - 2014-05-27
-[Unreleased]: https://github.com/xaque208/weigh/compare/v1.1.6...HEAD
+[Unreleased]: https://github.com/xaque208/weigh/compare/v1.1.8...HEAD
+[v1.1.8]: https://github.com/xaque208/weigh/compare/v1.1.7...v1.1.8
+[v1.1.7]: https://github.com/xaque208/weigh/compare/v1.1.6...v1.1.7
 [v1.1.6]: https://github.com/xaque208/weigh/compare/v1.1.5...v1.1.6
 [v1.1.5]: https://github.com/xaque208/weigh/compare/v1.1.4...v1.1.5
 [v1.1.4]: https://github.com/xaque208/weigh/compare/v1.1.3...v1.1.4
