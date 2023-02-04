@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/weaveworks/common/server"
 
-	"github.com/xaque208/weigh/modules/exporter"
+	"github.com/zachfi/weigh/modules/exporter"
 )
 
 const (

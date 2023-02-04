@@ -11,7 +11,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
 	github.com/weaveworks/common v0.0.0-20220916164235-da3fde973eec
-	github.com/xaque208/znet v0.31.5
+	github.com/zachfi/znet v0.32.0
 	go.opentelemetry.io/otel v1.4.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.4.0
 	go.opentelemetry.io/otel/sdk v1.4.0

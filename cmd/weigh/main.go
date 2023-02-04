@@ -39,10 +39,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/version"
 
-	"github.com/xaque208/znet/pkg/util"
+	"github.com/zachfi/znet/pkg/util"
 
-	"github.com/xaque208/weigh/app"
-	"github.com/xaque208/weigh/weigh"
+	"github.com/zachfi/weigh/app"
+	"github.com/zachfi/weigh/weigh"
 )
 
 const appName = "weigh"

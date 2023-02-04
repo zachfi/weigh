@@ -9,7 +9,7 @@ import (
 	"github.com/weaveworks/common/server"
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/xaque208/weigh/modules/exporter"
+	"github.com/zachfi/weigh/modules/exporter"
 )
 
 type Config struct {

@@ -12,7 +12,7 @@ import (
 	"github.com/weaveworks/common/server"
 	"github.com/weaveworks/common/signals"
 
-	"github.com/xaque208/znet/pkg/util"
+	"github.com/zachfi/znet/pkg/util"
 )
 
 const metricsNamespace = "weigh"
