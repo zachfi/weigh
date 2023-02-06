@@ -10,11 +10,12 @@ import (
 	yaml "gopkg.in/yaml.v2"
 
 	"github.com/zachfi/weigh/modules/exporter"
+	"github.com/zachfi/zkit/pkg/tracing"
 )
 
 type Config struct {
-	Target       string `yaml:"target"`
-	OtelEndpoint string `yaml:"otel_endpoint"`
+	Target  string         `yaml:"target"`
+	Tracing tracing.Config `yaml:"tracing"`
 
 	// modules
 	Server server.Config `yaml:"server,omitempty"`
@@ -53,5 +54,4 @@ func loadYamlFile(filename string, d interface{}) error {
 func (c *Config) RegisterFlagsAndApplyDefaults(prefix string, f *flag.FlagSet) {
 	c.Target = Once
 	f.StringVar(&c.Target, "target", Once, "target module")
-	f.StringVar(&c.OtelEndpoint, "otel_endpoint", "", "otel endpoint, eg: tempo:4317")
 }
