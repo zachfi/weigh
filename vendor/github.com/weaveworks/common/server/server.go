@@ -8,10 +8,10 @@ import (
 	"net"
 	"net/http"
 	_ "net/http/pprof" // anonymous import to get the pprof handler registered
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	otgrpc "github.com/opentracing-contrib/go-grpc"
 	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus"
@@ -102,13 +102,15 @@ type Config struct {
 	GRPCServerMinTimeBetweenPings      time.Duration `yaml:"grpc_server_min_time_between_pings"`
 	GRPCServerPingWithoutStreamAllowed bool          `yaml:"grpc_server_ping_without_stream_allowed"`
 
-	LogFormat             logging.Format    `yaml:"log_format"`
-	LogLevel              logging.Level     `yaml:"log_level"`
-	Log                   logging.Interface `yaml:"-"`
-	LogSourceIPs          bool              `yaml:"log_source_ips_enabled"`
-	LogSourceIPsHeader    string            `yaml:"log_source_ips_header"`
-	LogSourceIPsRegex     string            `yaml:"log_source_ips_regex"`
-	LogRequestAtInfoLevel bool              `yaml:"log_request_at_info_level_enabled"`
+	LogFormat                    logging.Format    `yaml:"log_format"`
+	LogLevel                     logging.Level     `yaml:"log_level"`
+	Log                          logging.Interface `yaml:"-"`
+	LogSourceIPs                 bool              `yaml:"log_source_ips_enabled"`
+	LogSourceIPsHeader           string            `yaml:"log_source_ips_header"`
+	LogSourceIPsRegex            string            `yaml:"log_source_ips_regex"`
+	LogRequestHeaders            bool              `yaml:"log_request_headers"`
+	LogRequestAtInfoLevel        bool              `yaml:"log_request_at_info_level_enabled"`
+	LogRequestExcludeHeadersList string            `yaml:"log_request_exclude_headers_list"`
 
 	// If not set, default signal handler is used.
 	SignalHandler SignalHandler `yaml:"-"`
@@ -126,8 +128,8 @@ var infinty = time.Duration(math.MaxInt64)
 func (cfg *Config) RegisterFlags(f *flag.FlagSet) {
 	f.StringVar(&cfg.HTTPListenAddress, "server.http-listen-address", "", "HTTP server listen address.")
 	f.StringVar(&cfg.HTTPListenNetwork, "server.http-listen-network", DefaultNetwork, "HTTP server listen network, default tcp")
-	f.StringVar(&cfg.CipherSuites, "server.tls-cipher-suites", "", "Comma-separated list of cipher suites to use. If blank, the default Go cipher suites will be used.")
-	f.StringVar(&cfg.MinVersion, "server.tls-min-version", "", "Minimum TLS version to use. If blank, the Go TLS minimum version will be used.")
+	f.StringVar(&cfg.CipherSuites, "server.tls-cipher-suites", "", "Comma-separated list of cipher suites to use. If blank, the default Go cipher suites is used.")
+	f.StringVar(&cfg.MinVersion, "server.tls-min-version", "", "Minimum TLS version to use. Allowed values: VersionTLS10, VersionTLS11, VersionTLS12, VersionTLS13. If blank, the Go TLS minimum version is used.")
 	f.StringVar(&cfg.HTTPTLSConfig.TLSCertPath, "server.http-tls-cert-path", "", "HTTP server cert path.")
 	f.StringVar(&cfg.HTTPTLSConfig.TLSKeyPath, "server.http-tls-key-path", "", "HTTP server key path.")
 	f.StringVar(&cfg.HTTPTLSConfig.ClientAuth, "server.http-tls-client-auth", "", "HTTP TLS Client Auth type.")
@@ -260,7 +262,7 @@ func New(cfg Config) (*Server, error) {
 	var httpTLSConfig *tls.Config
 	if len(cfg.HTTPTLSConfig.TLSCertPath) > 0 && len(cfg.HTTPTLSConfig.TLSKeyPath) > 0 {
 		// Note: ConfigToTLSConfig from prometheus/exporter-toolkit is awaiting security review.
-		httpTLSConfig, err = web.ConfigToTLSConfig(&web.TLSStruct{
+		httpTLSConfig, err = web.ConfigToTLSConfig(&web.TLSConfig{
 			TLSCertPath:  cfg.HTTPTLSConfig.TLSCertPath,
 			TLSKeyPath:   cfg.HTTPTLSConfig.TLSKeyPath,
 			ClientAuth:   cfg.HTTPTLSConfig.ClientAuth,
@@ -275,7 +277,7 @@ func New(cfg Config) (*Server, error) {
 	var grpcTLSConfig *tls.Config
 	if len(cfg.GRPCTLSConfig.TLSCertPath) > 0 && len(cfg.GRPCTLSConfig.TLSKeyPath) > 0 {
 		// Note: ConfigToTLSConfig from prometheus/exporter-toolkit is awaiting security review.
-		grpcTLSConfig, err = web.ConfigToTLSConfig(&web.TLSStruct{
+		grpcTLSConfig, err = web.ConfigToTLSConfig(&web.TLSConfig{
 			TLSCertPath:  cfg.GRPCTLSConfig.TLSCertPath,
 			TLSKeyPath:   cfg.GRPCTLSConfig.TLSKeyPath,
 			ClientAuth:   cfg.GRPCTLSConfig.ClientAuth,
@@ -356,12 +358,8 @@ func New(cfg Config) (*Server, error) {
 	}
 
 	grpcOptions := []grpc.ServerOption{
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-			grpcMiddleware...,
-		)),
-		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
-			grpcStreamMiddleware...,
-		)),
+		grpc.ChainUnaryInterceptor(grpcMiddleware...),
+		grpc.ChainStreamInterceptor(grpcStreamMiddleware...),
 		grpc.KeepaliveParams(grpcKeepAliveOptions),
 		grpc.KeepaliveEnforcementPolicy(grpcKeepAliveEnforcementPolicy),
 		grpc.MaxRecvMsgSize(cfg.GPRCServerMaxRecvMsgSize),
@@ -405,11 +403,7 @@ func New(cfg Config) (*Server, error) {
 			RouteMatcher: router,
 			SourceIPs:    sourceIPs,
 		},
-		middleware.Log{
-			Log:                   log,
-			SourceIPs:             sourceIPs,
-			LogRequestAtInfoLevel: cfg.LogRequestAtInfoLevel,
-		},
+		middleware.NewLogMiddleware(log, cfg.LogRequestHeaders, cfg.LogRequestAtInfoLevel, sourceIPs, strings.Split(cfg.LogRequestExcludeHeadersList, ",")),
 		middleware.Instrument{
 			RouteMatcher:     router,
 			Duration:         requestDuration,
