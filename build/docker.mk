@@ -17,10 +17,10 @@ docker-login:
 	@echo ${DOCKER_PASSWORD} | $(DOCKER) login -u ${DOCKER_USERNAME} --password-stdin
 
 docker:
-	docker build -t xaque208/weigh .
+	docker build -t zachfi/weigh .
 
 docker-snapshot: docker
-	docker tag xaque208/weigh:latest xaque208/weigh:${PROJECT_VER}
-	docker push xaque208/weigh:${PROJECT_VER}
+	docker tag zachfi/weigh:latest zachfi/weigh:${PROJECT_VER}
+	docker push zachfi/weigh:${PROJECT_VER}
 
 .PHONY: docker-login
