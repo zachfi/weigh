@@ -34,9 +34,9 @@ archives:
       linux: Linux
       amd64: x86_64
 checksum:
-  name_template: "{{ .ProjectName }}_checksums.txt"
+  name_template: '{{ .ProjectName }}_checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: '{{ .Tag }}-next'
 # Already using git-chglog
 changelog:
   skip: true
@@ -44,12 +44,12 @@ changelog:
 dockers:
   - dockerfile: build/package/Dockerfile
     image_templates:
-      - "xaque208/weigh:{{ .Tag }}"
-      - "xaque208/weigh:v{{ .Major }}.{{ .Minor }}"
-      - "xaque208/weigh:latest"
+      - 'zachfi/weigh:{{ .Tag }}'
+      - 'zachfi/weigh:v{{ .Major }}.{{ .Minor }}'
+      - 'zachfi/weigh:latest'
     build_flag_templates:
-      - "--pull"
-      - "--label=repository=https://github.com/xaque208/weigh"
+      - '--pull'
+      - '--label=repository=https://github.com/zachfi/weigh'
 
 release:
-  name_template: "{{.ProjectName}} v{{.Version}}"
+  name_template: '{{.ProjectName}} v{{.Version}}'
