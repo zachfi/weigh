@@ -91,9 +91,7 @@ func loadConfig() (*app.Config, error) {
 		configFileOption = "config.file"
 	)
 
-	var (
-		configFile string
-	)
+	var configFile string
 
 	args := os.Args[1:]
 	config := &app.Config{}

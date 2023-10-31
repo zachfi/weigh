@@ -2,15 +2,16 @@ package app
 
 import (
 	"flag"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/pkg/errors"
 	"github.com/weaveworks/common/server"
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/zachfi/weigh/modules/exporter"
 	"github.com/zachfi/zkit/pkg/tracing"
+
+	"github.com/zachfi/weigh/modules/exporter"
 )
 
 type Config struct {
@@ -38,7 +39,7 @@ func LoadConfig(file string) (Config, error) {
 
 // loadYamlFile unmarshals a YAML file into the received interface{} or returns an error.
 func loadYamlFile(filename string, d interface{}) error {
-	yamlFile, err := ioutil.ReadFile(filename)
+	yamlFile, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
@@ -54,4 +55,6 @@ func loadYamlFile(filename string, d interface{}) error {
 func (c *Config) RegisterFlagsAndApplyDefaults(prefix string, f *flag.FlagSet) {
 	c.Target = Once
 	f.StringVar(&c.Target, "target", Once, "target module")
+
+	c.Tracing.RegisterFlagsAndApplyDefaults("tracing", f)
 }
