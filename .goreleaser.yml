@@ -39,6 +39,7 @@ archives:
       {{- else if eq .Os "freebsd" }}FreeBSD
       {{- else }}{{ .Os }}{{ end }}_
       {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm" }}arm{{ .ArmVersion }}
       {{- else }}{{ .Arch }}{{ end }}
 
 checksum:
