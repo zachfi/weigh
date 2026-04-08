@@ -2,10 +2,11 @@ package weigh
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -30,7 +31,7 @@ func (w *Weigh) Summarize() {
 		w.Paths = []string{"./"}
 	}
 
-	summaries := SummariesData{}
+	summaries := make(SummariesData, 0, len(w.Paths))
 
 	for _, d := range w.Paths {
 		summaries = append(summaries, topDir(d)...)
@@ -52,17 +53,11 @@ func (w *Weigh) Report() {
 
 		total += item.Bytes
 
-		fi, err := os.Stat(item.Name)
-
-		switch {
-		case err != nil:
-			log.Error(err)
-		case fi.IsDir():
+		if item.IsDir {
 			fmt.Printf("%15s    %s/\n", neatSize(item.Bytes), item.Name)
-		default:
+		} else {
 			fmt.Printf("%15s    %s\n", neatSize(item.Bytes), item.Name)
 		}
-
 	}
 
 	fmt.Printf("%16s %s\n", "---", "---")
@@ -73,6 +68,7 @@ func (w *Weigh) Report() {
 type SummaryData struct {
 	Name  string
 	Bytes int64
+	IsDir bool
 }
 
 type SummariesData []SummaryData
@@ -118,24 +114,23 @@ func dirBytes(directory string) int64 {
 	log.Debugf("Entering directory %s", directory)
 	var dirSize int64 = 0
 
-	countDir := func(path string, info os.FileInfo, err error) error {
-		if info == nil {
-			return fmt.Errorf("unable to count nil info: %s", path)
-		}
-
-		if !info.IsDir() {
-			dirSize += info.Size()
-		}
-
+	countDir := func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			log.Error(err)
+			return nil
 		}
-
+		if !d.IsDir() {
+			info, err := d.Info()
+			if err != nil {
+				log.Error(err)
+				return nil
+			}
+			dirSize += info.Size()
+		}
 		return nil
 	}
 
-	err := filepath.Walk(directory, countDir)
-	if err != nil {
+	if err := filepath.WalkDir(directory, countDir); err != nil {
 		log.Error(err)
 	}
 
@@ -143,20 +138,40 @@ func dirBytes(directory string) int64 {
 }
 
 func topDir(directory string) SummariesData {
-	summary := SummariesData{}
-
-	files, err := ioutil.ReadDir(directory)
+	files, err := os.ReadDir(directory)
 	if err != nil {
 		log.Error(err)
+		return SummariesData{}
 	}
 
-	for _, f := range files {
+	results := make(SummariesData, len(files))
+	var wg sync.WaitGroup
+
+	for i, f := range files {
 		fullpath := filepath.Join(directory, f.Name())
 
 		if f.IsDir() {
-			summary = append(summary, SummaryData{Name: fullpath, Bytes: dirBytes(fullpath)})
+			wg.Add(1)
+			go func(idx int, path string) {
+				defer wg.Done()
+				results[idx] = SummaryData{Name: path, Bytes: dirBytes(path), IsDir: true}
+			}(i, fullpath)
 		} else {
-			summary = append(summary, SummaryData{Name: fullpath, Bytes: f.Size()})
+			info, err := f.Info()
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			results[i] = SummaryData{Name: fullpath, Bytes: info.Size()}
+		}
+	}
+
+	wg.Wait()
+
+	summary := make(SummariesData, 0, len(results))
+	for _, r := range results {
+		if r.Name != "" {
+			summary = append(summary, r)
 		}
 	}
 

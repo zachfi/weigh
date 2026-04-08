@@ -7,7 +7,6 @@ import (
 )
 
 func TestNeatSize(t *testing.T) {
-
 	cases := []struct {
 		expected string
 		size     int64
@@ -41,5 +40,11 @@ func TestNeatSize(t *testing.T) {
 	for _, tc := range cases {
 		require.Equal(t, tc.expected, neatSize(tc.size))
 	}
+}
 
+func BenchmarkWeigh(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		w := Weigh{Paths: []string{"/var"}}
+		w.Summarize()
+	}
 }

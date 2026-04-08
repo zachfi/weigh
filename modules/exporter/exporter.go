@@ -2,9 +2,11 @@ package exporter
 
 import (
 	"context"
+	"path/filepath"
 	"time"
 
 	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 
@@ -67,7 +69,13 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	for _, target := range e.cfg.Targets {
-		x := weigh.Weigh{Paths: []string{target}}
+		cleaned, err := filepath.Abs(filepath.Clean(target))
+		if err != nil {
+			_ = level.Error(e.logger).Log("msg", "failed to resolve target path", "target", target, "err", err)
+			continue
+		}
+
+		x := weigh.Weigh{Paths: []string{cleaned}}
 
 		t := time.Now()
 		x.Summarize()
