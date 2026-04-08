@@ -54,6 +54,7 @@ changelog:
 
 dockers:
   - dockerfile: build/package/Dockerfile
+    use: docker
     image_templates:
       - 'zachfi/weigh:{{ .Tag }}'
       - 'zachfi/weigh:v{{ .Major }}.{{ .Minor }}'
