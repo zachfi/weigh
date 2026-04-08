@@ -44,8 +44,11 @@ func (w *Weigh) Report() {
 	summaries := w.Summaries
 	var total int64 = 0
 
-	sort.Sort(summaries)
+	sort.Slice(summaries, func(i, j int) bool {
+		return summaries[i].Bytes > summaries[j].Bytes
+	})
 
+	sep := fmt.Sprintf("%15s    %s", "---", "---")
 	for _, item := range summaries {
 		if item.Bytes == 0 {
 			continue
@@ -60,9 +63,9 @@ func (w *Weigh) Report() {
 		}
 	}
 
-	fmt.Printf("%16s %s\n", "---", "---")
-	fmt.Printf("%15s  %s\n", neatSize(total), ":total size")
-	fmt.Printf("%16s %s\n", "---", "---")
+	fmt.Println(sep)
+	fmt.Printf("%15s    %s\n", neatSize(total), "total")
+	fmt.Println(sep)
 }
 
 type SummaryData struct {
@@ -73,20 +76,7 @@ type SummaryData struct {
 
 type SummariesData []SummaryData
 
-func (slice SummariesData) Len() int {
-	return len(slice)
-}
-
-func (slice SummariesData) Less(i, j int) bool {
-	return slice[i].Bytes < slice[j].Bytes
-}
-
-func (slice SummariesData) Swap(i, j int) {
-	slice[i], slice[j] = slice[j], slice[i]
-}
-
 func neatSize(bytes int64) string {
-
 	if bytes >= PETABYTE {
 		return fmt.Sprintf("%.2f PiB", float64(bytes)/float64(PETABYTE))
 	}
