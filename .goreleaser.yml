@@ -52,16 +52,5 @@ snapshot:
 changelog:
   disable: true
 
-dockers:
-  - dockerfile: build/package/Dockerfile
-    use: docker
-    image_templates:
-      - 'zachfi/weigh:{{ .Tag }}'
-      - 'zachfi/weigh:v{{ .Major }}.{{ .Minor }}'
-      - 'zachfi/weigh:latest'
-    build_flag_templates:
-      - '--pull'
-      - '--label=repository=https://github.com/zachfi/weigh'
-
 release:
   name_template: '{{.ProjectName}} v{{.Version}}'
