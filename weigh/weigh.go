@@ -3,12 +3,12 @@ package weigh
 import (
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"sync"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -27,7 +27,6 @@ type Weigh struct {
 
 func (w *Weigh) Summarize() {
 	if len(w.Paths) == 0 {
-		log.Debugf("Adding default path")
 		w.Paths = []string{"./"}
 	}
 
@@ -77,64 +76,59 @@ type SummaryData struct {
 type SummariesData []SummaryData
 
 func neatSize(bytes int64) string {
-	if bytes >= PETABYTE {
+	switch {
+	case bytes >= PETABYTE:
 		return fmt.Sprintf("%.2f PiB", float64(bytes)/float64(PETABYTE))
-	}
-
-	if bytes >= TERABYTE {
+	case bytes >= TERABYTE:
 		return fmt.Sprintf("%.2f TiB", float64(bytes)/float64(TERABYTE))
-	}
-
-	if bytes >= GIGABYTE {
+	case bytes >= GIGABYTE:
 		return fmt.Sprintf("%.2f GiB", float64(bytes)/float64(GIGABYTE))
-	}
-
-	if bytes >= MEGABYTE {
+	case bytes >= MEGABYTE:
 		return fmt.Sprintf("%.2f MiB", float64(bytes)/float64(MEGABYTE))
-	}
-
-	if bytes >= KILOBYTE {
+	case bytes >= KILOBYTE:
 		return fmt.Sprintf("%.2f KiB", float64(bytes)/float64(KILOBYTE))
+	default:
+		return fmt.Sprintf("%d bytes", bytes)
 	}
-
-	return fmt.Sprintf("%d bytes", int64(bytes))
 }
 
 func dirBytes(directory string) int64 {
-	log.Debugf("Entering directory %s", directory)
-	var dirSize int64 = 0
+	var dirSize int64
 
-	countDir := func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(directory, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			log.Error(err)
+			slog.Debug("walk error", "path", path, "err", err)
 			return nil
 		}
 		if !d.IsDir() {
 			info, err := d.Info()
 			if err != nil {
-				log.Error(err)
+				slog.Debug("stat error", "path", path, "err", err)
 				return nil
 			}
 			dirSize += info.Size()
 		}
 		return nil
-	}
-
-	if err := filepath.WalkDir(directory, countDir); err != nil {
-		log.Error(err)
+	})
+	if err != nil {
+		slog.Error("walkdir failed", "dir", directory, "err", err)
 	}
 
 	return dirSize
 }
 
+// workers bounds the concurrent goroutines spawned by topDir.
+var workers = runtime.NumCPU() * 2
+
 func topDir(directory string) SummariesData {
 	files, err := os.ReadDir(directory)
 	if err != nil {
-		log.Error(err)
+		slog.Error("readdir failed", "dir", directory, "err", err)
 		return SummariesData{}
 	}
 
 	results := make(SummariesData, len(files))
+	sem := make(chan struct{}, workers)
 	var wg sync.WaitGroup
 
 	for i, f := range files {
@@ -142,14 +136,18 @@ func topDir(directory string) SummariesData {
 
 		if f.IsDir() {
 			wg.Add(1)
+			sem <- struct{}{}
 			go func(idx int, path string) {
-				defer wg.Done()
+				defer func() {
+					<-sem
+					wg.Done()
+				}()
 				results[idx] = SummaryData{Name: path, Bytes: dirBytes(path), IsDir: true}
 			}(i, fullpath)
 		} else {
 			info, err := f.Info()
 			if err != nil {
-				log.Error(err)
+				slog.Debug("stat error", "path", fullpath, "err", err)
 				continue
 			}
 			results[i] = SummaryData{Name: fullpath, Bytes: info.Size()}

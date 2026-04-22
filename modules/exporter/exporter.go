@@ -28,6 +28,12 @@ var (
 		[]string{"path"},
 		nil,
 	)
+	weighErrorsDesc = prometheus.NewDesc(
+		"weigh_collect_errors_total",
+		"Total number of targets that failed to collect",
+		nil,
+		nil,
+	)
 )
 
 type Exporter struct {
@@ -65,13 +71,17 @@ func (e *Exporter) stopping(_ error) error {
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- weighDurationDesc
 	ch <- weighTargetDesc
+	ch <- weighErrorsDesc
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
+	var errors float64
+
 	for _, target := range e.cfg.Targets {
 		cleaned, err := filepath.Abs(filepath.Clean(target))
 		if err != nil {
 			_ = level.Error(e.logger).Log("msg", "failed to resolve target path", "target", target, "err", err)
+			errors++
 			continue
 		}
 
@@ -79,10 +89,12 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 		t := time.Now()
 		x.Summarize()
-		ch <- prometheus.MustNewConstMetric(weighDurationDesc, prometheus.GaugeValue, float64(time.Since(t).Seconds()), target)
+		ch <- prometheus.MustNewConstMetric(weighDurationDesc, prometheus.GaugeValue, time.Since(t).Seconds(), cleaned)
 
 		for _, s := range x.Summaries {
 			ch <- prometheus.MustNewConstMetric(weighTargetDesc, prometheus.GaugeValue, float64(s.Bytes), s.Name)
 		}
 	}
+
+	ch <- prometheus.MustNewConstMetric(weighErrorsDesc, prometheus.GaugeValue, errors)
 }

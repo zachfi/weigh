@@ -61,7 +61,11 @@ func main() {
 	}
 
 	if cfg.Target == app.Once {
-		w := weigh.Weigh{Paths: cfg.Exporter.Targets}
+		paths := cfg.Exporter.Targets
+		if args := flag.Args(); len(args) > 0 {
+			paths = args
+		}
+		w := weigh.Weigh{Paths: paths}
 		w.Summarize()
 		w.Report()
 		return
