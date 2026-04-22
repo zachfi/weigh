@@ -58,7 +58,7 @@ func (a *App) initExporter() (services.Service, error) {
 func (a *App) initServer() (services.Service, error) {
 	a.cfg.Server.MetricsNamespace = metricsNamespace
 	a.cfg.Server.ExcludeRequestInLog = true
-	a.cfg.Server.RegisterInstrumentation = true
+	a.cfg.Server.RegisterInstrumentation = false
 
 	server, err := server.New(a.cfg.Server)
 	if err != nil {
