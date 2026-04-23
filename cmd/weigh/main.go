@@ -26,7 +26,6 @@ import (
 	yaml "gopkg.in/yaml.v2"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/common/version"
 
 	ztrace "github.com/zachfi/zkit/pkg/tracing"
 	"github.com/zachfi/znet/pkg/util"
@@ -45,10 +44,18 @@ var (
 )
 
 func init() {
-	version.Version = Version
-	version.Branch = Branch
-	version.Revision = Revision
-	prometheus.MustRegister(version.NewCollector(appName))
+	prometheus.MustRegister(prometheus.NewGaugeFunc(
+		prometheus.GaugeOpts{
+			Name: appName + "_build_info",
+			Help: "Build information.",
+			ConstLabels: prometheus.Labels{
+				"version":  Version,
+				"revision": Revision,
+				"branch":   Branch,
+			},
+		},
+		func() float64 { return 1 },
+	))
 }
 
 func main() {

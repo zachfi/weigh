@@ -9,8 +9,8 @@ import (
 	"github.com/grafana/dskit/modules"
 	"github.com/grafana/dskit/services"
 	"github.com/pkg/errors"
-	"github.com/weaveworks/common/server"
-	"github.com/weaveworks/common/signals"
+	"github.com/grafana/dskit/server"
+	"github.com/grafana/dskit/signals"
 
 	"github.com/zachfi/znet/pkg/util"
 )

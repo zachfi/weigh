@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/weaveworks/common/server"
+	"github.com/grafana/dskit/server"
 	yaml "gopkg.in/yaml.v2"
 
 	"github.com/zachfi/zkit/pkg/tracing"
